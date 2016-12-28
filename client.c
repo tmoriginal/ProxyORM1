@@ -1,4 +1,4 @@
-/* 
+/*
     ********************************************************************
     Odsek:          Elektrotehnika i racunarstvo
     Departman:      Racunarstvo i automatika
@@ -7,10 +7,10 @@
     Godina studija: Treca (III)
     Skolska godina: 2016/2017
     Semestar:       Zimski (V)
-    
+
     Ime fajla:      client.c
     Opis:           TCP/IP klijent
-    
+
     Platforma:      Raspberry Pi 2 - Model B
     OS:             Raspbian
     ********************************************************************
@@ -25,12 +25,14 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
+#define login_length 48
 
 int main(int argc , char *argv[])
 {
-    int sock;
+    int sock,read_size;
     struct sockaddr_in server;
-    char *message = "this is a test";
+    char username_request[login_length], password_request[login_length];
+    char username[login_length], password[login_length];
 
     //Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -53,18 +55,68 @@ int main(int argc , char *argv[])
 
     puts("Connected\n");
 
-    //Send some data
-    if( send(sock , message , strlen(message), 0) < 0)
+    ///////////////////
+    server_sock = accept(sock, (struct sockaddr *)&server, (socklen_t*)&c);
+    if (client_sock < 0)
+    {
+        perror("accept failed");
+        return 1;
+    }
+    puts("Connection accepted");
+
+    //////////////////
+
+    //Receive username request!
+    while( (read_size = recv(sock , username_request , DEFAULT_BUFLEN , 0)) > 0 )
+    {
+        printf("%s", username_request);
+        puts("Ide");
+    }
+    puts("ne");
+    //Enter username
+    if(read_size != 0)
+    {
+      scanf("%s",username);
+    }
+    else if(read_size == -1)
+    {
+      perror("recv failed");
+    }
+
+    //Send username
+    if( send(sock , username , strlen(username), 0) < 0)
     {
         puts("Send failed");
         return 1;
     }
 
-    puts("Client message:");
-    puts(message);
+    //Receive password request!
+    while( (read_size = recv(sock , password_request , DEFAULT_BUFLEN , 0)) > 0 )
+    {
+        printf("%s", password_request);
+    }
+
+    if(read_size != 0)
+    {
+      scanf("%s",password);
+    }
+    else if(read_size == -1)
+    {
+      perror("recv failed");
+    }
+
+    //Send password
+    if( send(sock , password , strlen(password), 0) < 0)
+    {
+        puts("Send failed");
+        return 1;
+    }
+
+
+
+
 
     close(sock);
 
     return 0;
 }
-
