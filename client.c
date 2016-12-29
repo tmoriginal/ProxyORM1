@@ -25,7 +25,7 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
-#define login_length 48
+#define login_length 64
 
 int main(int argc , char *argv[])
 {
@@ -55,33 +55,22 @@ int main(int argc , char *argv[])
 
     puts("Connected\n");
 
-    ///////////////////
-    server_sock = accept(sock, (struct sockaddr *)&server, (socklen_t*)&c);
-    if (client_sock < 0)
-    {
-        perror("accept failed");
-        return 1;
-    }
-    puts("Connection accepted");
-
-    //////////////////
-
     //Receive username request!
     while( (read_size = recv(sock , username_request , DEFAULT_BUFLEN , 0)) > 0 )
     {
-        printf("%s", username_request);
-        puts("Ide");
+        puts(username_request);
+        break;
     }
-    puts("ne");
-    //Enter username
-    if(read_size != 0)
-    {
-      scanf("%s",username);
-    }
-    else if(read_size == -1)
+
+    if(read_size == -1)
     {
       perror("recv failed");
+      return 0;
     }
+
+    //Enter username
+    gets(username);
+    fflush(stdin);
 
     //Send username
     if( send(sock , username , strlen(username), 0) < 0)
@@ -93,17 +82,19 @@ int main(int argc , char *argv[])
     //Receive password request!
     while( (read_size = recv(sock , password_request , DEFAULT_BUFLEN , 0)) > 0 )
     {
-        printf("%s", password_request);
+        puts(password_request);
+        break;
     }
 
-    if(read_size != 0)
-    {
-      scanf("%s",password);
-    }
-    else if(read_size == -1)
+    if(read_size == -1)
     {
       perror("recv failed");
     }
+
+    //Enter password
+
+    gets(password);
+    fflush(stdin);
 
     //Send password
     if( send(sock , password , strlen(password), 0) < 0)

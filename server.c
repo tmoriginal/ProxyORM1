@@ -73,26 +73,14 @@ int main(int argc , char *argv[])
     }
     puts("Connection accepted");
 
-    ////////////////////
-
-    if (connect(sock_desc , (struct sockaddr *)&server , sizeof(server)) < 0)
-    {
-        perror("connect failed. Error");
-        return 1;
-    }
-    puts("Connected\n");
-
-
-
-     ///////////////////////////////////////////
-
+    //send username_request
      if( send(client_sock , username_request , strlen(username_request), 0) < 0)
      {
          puts("Send failed");
          return 1;
      }
-     puts("Ide");
 
+     //recieve username
     while( (read_size = recv(client_sock, u_buff , DEFAULT_BUFLEN , 0)) > 0 )
     {
         for(i = 0; i < read_size; i++)
@@ -103,6 +91,7 @@ int main(int argc , char *argv[])
             break;
           }
         }
+        break;
     }
 
     if(flag_u == 0)
@@ -123,6 +112,7 @@ int main(int argc , char *argv[])
               break;
             }
           }
+          break;
       }
 
       if(flag_p == 1)
