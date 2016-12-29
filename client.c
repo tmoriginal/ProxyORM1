@@ -17,6 +17,7 @@
 */
 
 #include<stdio.h>      //printf
+#include<stdlib.h>
 #include<string.h>     //strlen
 #include<sys/socket.h> //socket
 #include<arpa/inet.h>  //inet_addr
@@ -25,7 +26,7 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
-#define login_length 64
+#define login_length 20000
 
 int main(int argc , char *argv[])
 {
@@ -33,6 +34,7 @@ int main(int argc , char *argv[])
     struct sockaddr_in server;
     char username_request[login_length], password_request[login_length];
     char username[login_length], password[login_length];
+    char status_buff[login_length];
 
     //Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -54,11 +56,13 @@ int main(int argc , char *argv[])
     }
 
     puts("Connected\n");
+    fflush(stdout);
 
     //Receive username request!
     while( (read_size = recv(sock , username_request , DEFAULT_BUFLEN , 0)) > 0 )
     {
         puts(username_request);
+        fflush(stdout);
         break;
     }
 
@@ -83,6 +87,7 @@ int main(int argc , char *argv[])
     while( (read_size = recv(sock , password_request , DEFAULT_BUFLEN , 0)) > 0 )
     {
         puts(password_request);
+        fflush(stdout);
         break;
     }
 
@@ -103,9 +108,18 @@ int main(int argc , char *argv[])
         return 1;
     }
 
+    //Login successfully?
+    while( (read_size = recv(sock , status_buff , DEFAULT_BUFLEN , 0)) > 0 )
+    {
+        puts(status_buff);
+        fflush(stdout);
+        break;
+    }
 
-
-
+    if(read_size == -1)
+    {
+      perror("recv failed");
+    }
 
     close(sock);
 

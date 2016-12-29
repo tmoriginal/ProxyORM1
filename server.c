@@ -17,6 +17,7 @@
 */
 
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>    //strlen
 #include<sys/socket.h>
 #include<arpa/inet.h> //inet_addr
@@ -31,9 +32,11 @@ int main(int argc , char *argv[])
     int i, flag_u = 0 , flag_p = 0;
     struct sockaddr_in server , client;
     char u_buff[DEFAULT_BUFLEN], p_buff[DEFAULT_BUFLEN];
-    char username[] = "Test_u", password[] = "Test_p";
-    char username_request[] = "Enter username!", password_request[] = "Enter password to connect!";
-    char wrong_u[] = "Wrong username!", wrong_p[] = "Wrong password!";
+    char username[] = "Test_u\0", password[] = "Test_p\0";
+    char *username_request = "Enter username!\0";
+    char *password_request = "Enter password to connect!\0";
+    char wrong_u[] = "Wrong username!\0", wrong_p[] = "Wrong password, you're not connected!\0";
+    char connected[] = "Connected to proxy\0";
 
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
@@ -71,7 +74,6 @@ int main(int argc , char *argv[])
         perror("accept failed");
         return 1;
     }
-    puts("Connection accepted");
 
     //send username_request
      if( send(client_sock , username_request , strlen(username_request), 0) < 0)
@@ -83,9 +85,9 @@ int main(int argc , char *argv[])
      //recieve username
     while( (read_size = recv(client_sock, u_buff , DEFAULT_BUFLEN , 0)) > 0 )
     {
-        for(i = 0; i < read_size; i++)
+        for(i = 0; i < strlen(username); i++)
         {
-          if(u_buff[i] != username[i])
+          if(username[i] != u_buff[i])
           {
             flag_u = 1;
             break;
@@ -104,7 +106,7 @@ int main(int argc , char *argv[])
 
       while( (read_size = recv(client_sock , p_buff , DEFAULT_BUFLEN , 0)) > 0 )
       {
-          for(i = 0; i < read_size; i++)
+          for(i = 0; i < strlen(p_buff); i++)
           {
             if(p_buff[i] != password[i])
             {
@@ -115,7 +117,15 @@ int main(int argc , char *argv[])
           break;
       }
 
-      if(flag_p == 1)
+      if(flag_p == 0)
+      {
+        if( send(client_sock , connected , strlen(connected), 0) < 0)
+        {
+            puts("Send failed");
+            return 1;
+        }
+      }
+      else if(flag_p == 1)
       {
         if( send(client_sock , wrong_p , strlen(wrong_p), 0) < 0)
         {
@@ -134,22 +144,6 @@ int main(int argc , char *argv[])
       }
     }
 
-
-    /*//Receive a message from client
-    while( (read_size = recv(client_sock , client_message , DEFAULT_BUFLEN , 0)) > 0 )
-    {
-        printf("Bytes received: %d\n", read_size);
-    }
-
-    if(read_size == 0)
-    {
-        puts("Client disconnected");
-        fflush(stdout);
-    }
-    else if(read_size == -1)
-    {
-        perror("recv failed");
-    }*/
 
     return 0;
 }
